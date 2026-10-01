@@ -1,3 +1,6 @@
+// Copyright 2026 Erst Users
+// SPDX-License-Identifier: Apache-2.0
+
 package rpc
 
 import (
@@ -41,25 +44,25 @@ func (c *Client) EventsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	params := map[string]interface{}{
+	params := map[string]any{
 		"startLedger": startLedger,
-		"pagination": map[string]interface{}{
+		"pagination": map[string]any{
 			"limit": limit,
 		},
 	}
 	
 	if cursor != "" {
-		params["pagination"].(map[string]interface{})["cursor"] = cursor
+		params["pagination"].(map[string]any)["cursor"] = cursor
 	}
 
-	reqBody := map[string]interface{}{
+	reqBody := map[string]any{
 		"jsonrpc": "2.0",
 		"id":      1,
 		"method":  "getEvents",
 		"params":  params,
 	}
 	
-	var rpcResp interface{}
+	var rpcResp any
 	err := c.postRequest(ctx, reqBody, &rpcResp)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to fetch events: %v", err), http.StatusInternalServerError)
@@ -67,5 +70,7 @@ func (c *Client) EventsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(rpcResp)
+	if err := json.NewEncoder(w).Encode(rpcResp); err != nil {
+		http.Error(w, fmt.Sprintf("failed to encode response: %v", err), http.StatusInternalServerError)
+	}
 }
