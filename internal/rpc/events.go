@@ -15,7 +15,7 @@ import (
 // and limits results to a maximum of 100 per page to prevent browser crashes.
 func (c *Client) EventsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	
+
 	// Default limit to 100 maximum
 	limit := 100
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
@@ -23,11 +23,11 @@ func (c *Client) EventsHandler(w http.ResponseWriter, r *http.Request) {
 			limit = l
 		}
 	}
-	
+
 	// Read cursor (ledger sequence)
 	cursor := r.URL.Query().Get("cursor")
 	startLedger := uint32(0)
-	
+
 	if cursor != "" {
 		if val, err := strconv.ParseUint(cursor, 10, 32); err == nil {
 			startLedger = uint32(val)
@@ -50,7 +50,7 @@ func (c *Client) EventsHandler(w http.ResponseWriter, r *http.Request) {
 			"limit": limit,
 		},
 	}
-	
+
 	if cursor != "" {
 		params["pagination"].(map[string]any)["cursor"] = cursor
 	}
@@ -61,7 +61,7 @@ func (c *Client) EventsHandler(w http.ResponseWriter, r *http.Request) {
 		"method":  "getEvents",
 		"params":  params,
 	}
-	
+
 	var rpcResp any
 	err := c.postRequest(ctx, reqBody, &rpcResp)
 	if err != nil {
